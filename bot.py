@@ -153,13 +153,6 @@ def start_handler(update: Update, context: CallbackContext):
 			os.makedirs(pkgd, exist_ok=True)
 		
 		rwd = '/home/jovyan/workspace'
-		#container = cfg['image']+'_'+str(tgid)
-		#subprocess.Popen(["docker", "run", "-it", "--rm", "-e", "18812", \
-		#		  "-v", wd+":"+rwd+":rw", "--name", container, cfg['image'], \
-		#		  "start.sh", "/opt/conda/bin/rpyc_classic.py"])
-		#sleep(3)
-		#out = subprocess.check_output(["docker", "inspect", "-f", "'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'", container])
-		#ip = out.decode("utf-8")[1:-2]
 		ip = socket.gethostbyname("stem-bot_jupyter_1")
 
 		t = Timer(timer_value, stop_container, [tgid])
