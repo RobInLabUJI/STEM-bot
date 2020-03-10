@@ -25,7 +25,6 @@ services:
     volumes:
       - ./log:/root/log
       - ./workspace:/root/workspace
-    container_name: bot
     deploy:
       resources:
         limits:

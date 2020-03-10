@@ -115,7 +115,7 @@ def write_log(tgid, s):
 	filename = 'log/' + str(tgid) + '.log'
 	dt = datetime.datetime.now()
 	with open(filename, "a") as logfile:
-		logfile.write('### ' + dt.isoformat() + ' ###')
+		logfile.write('### ' + dt.isoformat())
 		logfile.write('\n')
 		logfile.write(s)
 		logfile.write('\n')
@@ -131,22 +131,23 @@ def stop_container(tgid):
 def start_handler(update: Update, context: CallbackContext):
 	global num_kernels
 	tgid = update.message.from_user.id
-	write_log(tgid, '/start')
+	kernel = context.args[0]
+	write_log(tgid, '/start '+ kernel)
 	if tgid in kernel_dict:
 		update.message.reply_text('Kernel already started')
-	elif num_kernels >=100:
+	elif num_kernels >=5:
 		update.message.reply_text('Too many users, please come back later!')
 	else:
 		num_kernels += 1
 		update.message.reply_text('Starting kernel...')
 		wd = '/root/workspace/' + str(tgid)
 		os.makedirs(wd, exist_ok=True)
-		if cfg['kernel'] == 'python':
+		if kernel == 'python':
 			pass
-		elif cfg['kernel'] == 'ir':
+		elif kernel == 'ir':
 			rlibd = wd + '/R-libs'
 			os.makedirs(rlibd, exist_ok=True)
-		elif cfg['kernel'] == 'octave':
+		elif kernel == 'octave':
 			pkgd = wd + '/octave_packages'
 			os.makedirs(pkgd, exist_ok=True)
 		
@@ -165,12 +166,12 @@ def start_handler(update: Update, context: CallbackContext):
 		conn = rpyc.classic.connect(ip)
 		jupyter_client = conn.modules['jupyter_client']
 
-		km = jupyter_client.KernelManager(kernel_name = cfg['kernel'])
+		km = jupyter_client.KernelManager(kernel_name = kernel)
 		km.start_kernel(cwd=rwd)
 		cl = km.blocking_client()
 		_init_commands(cl, rwd)
 		kernel_dict[tgid] = (km, cl, jupyter_client, conn, t)
-		update.message.reply_text('Ready!')
+		update.message.reply_text(kernel + ' is ready!')
 
 @run_async
 def help_handler(update: Update, context: CallbackContext):
