@@ -13,10 +13,11 @@ from io import BytesIO
 from threading import Timer
 
 class Listener():
-	def __init__(self):
+	def __init__(self, kernel):
 		self.text = ''
 		self.ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 		self.img_data = None
+		self.kernel = kernel
 
 	def escape_ansi_text(self):
 		return self.ansi_escape.sub('', self.text)
@@ -26,7 +27,7 @@ class Listener():
 		content = msg['content']
 		if msg_type == 'execute_result': # or msg_type == 'display_data':
 			self.text += content['data']['text/plain']
-		elif msg_type == 'display_data' and cfg['kernel'] == 'ir' and 'text/plain' in content['data']:
+		elif msg_type == 'display_data' and self.kernel == 'R' and 'text/plain' in content['data']:
 			if content['data']['text/plain'] != 'plot without title':
 				self.text += content['data']['text/plain']
 		elif msg_type == 'stream':
@@ -47,18 +48,18 @@ def text_handler(update: Update, context: CallbackContext):
 	if not tgid in kernel_dict:
 		update.message.reply_text('Kernel not running, please use command /start')
 	else:
-		(km, cl, jc, cnn, t) = kernel_dict[tgid]
+		(km, cl, jc, cnn, t, kernel) = kernel_dict[tgid]
 		if not km.is_alive():
 			update.message.reply_text('Kernel not running, please use command /restart')
 		else:
 			t.cancel()
 			t = Timer(timer_value, stop_container, [tgid])
 			t.start()
-			kernel_dict[tgid] = (km, cl, jc, cnn, t)
-			li = Listener()
+			kernel_dict[tgid] = (km, cl, jc, cnn, t, kernel)
+			li = Listener(kernel)
 			try:
 				timeout = 5.0
-				if cfg['kernel'] == 'octave' and update.message.text[:11] == 'pkg install':
+				if kernel == 'octave' and update.message.text[:11] == 'pkg install':
 					timeout = 60.0
 				reply = cl.execute_interactive(update.message.text, allow_stdin=False, 
 							       timeout=timeout, output_hook=li.output_cb)
@@ -81,13 +82,13 @@ def text_handler(update: Update, context: CallbackContext):
 def error_handler(update: Update, context: CallbackContext):
 	logger.warning('Update "%s" caused error "%s"' % (update, context.error))
 
-def _init_commands(cl, wd):
-	if cfg['kernel'] == 'python':
+def _init_commands(cl, wd, kernel):
+	if kernel == 'python':
 		cl.execute_interactive("%matplotlib inline")
-	elif cfg['kernel'] == 'ir':
+	elif kernel == 'R':
 		rlibd = wd + '/R-libs'
 		cl.execute_interactive(".libPaths('%s')" % rlibd)
-	elif cfg['kernel'] == 'octave':
+	elif kernel == 'octave':
 		pkgd = 'octave_packages'
 		cl.execute_interactive("pkg prefix %s %s" % (pkgd, pkgd))
 		cl.execute_interactive("pkg local_list %s/.octave_packages" % pkgd)
@@ -99,16 +100,16 @@ def restart_handler(update: Update, context: CallbackContext):
 	if not tgid in kernel_dict:
 		update.message.reply_text('Kernel not running, please use command /start')
 	else:
-		(km, cl, jc, cnn, t) = kernel_dict[tgid]
+		(km, cl, jc, cnn, t, kernel) = kernel_dict[tgid]
 		t.cancel()
 		update.message.reply_text('Restarting kernel...')
 		rwd = '/home/jovyan/workspace'
 		km.restart_kernel(cwd=rwd)
 		cl = km.blocking_client()
-		_init_commands(cl, rwd)
+		_init_commands(cl, rwd, kernel)
 		t = Timer(timer_value, stop_container, [tgid])
 		t.start()
-		kernel_dict[tgid] = (km, cl, jc, cnn, t)
+		kernel_dict[tgid] = (km, cl, jc, cnn, t, kernel)
 		update.message.reply_text('Ready!')
 
 def write_log(tgid, s):
@@ -144,7 +145,7 @@ def start_handler(update: Update, context: CallbackContext):
 		os.makedirs(wd, exist_ok=True)
 		if kernel == 'python':
 			pass
-		elif kernel == 'ir':
+		elif kernel == 'R':
 			rlibd = wd + '/R-libs'
 			os.makedirs(rlibd, exist_ok=True)
 		elif kernel == 'octave':
@@ -166,24 +167,29 @@ def start_handler(update: Update, context: CallbackContext):
 		conn = rpyc.classic.connect(ip)
 		jupyter_client = conn.modules['jupyter_client']
 
-		km = jupyter_client.KernelManager(kernel_name = kernel)
+		if kernel=='R':
+			kernel_name = 'ir'
+		else:
+			kernel_name = kernel
+		km = jupyter_client.KernelManager(kernel_name = kernel_name)
 		km.start_kernel(cwd=rwd)
 		cl = km.blocking_client()
-		_init_commands(cl, rwd)
-		kernel_dict[tgid] = (km, cl, jupyter_client, conn, t)
+		_init_commands(cl, rwd, kernel)
+		kernel_dict[tgid] = (km, cl, jupyter_client, conn, t, kernel)
 		update.message.reply_text(kernel + ' is ready!')
 
 @run_async
 def help_handler(update: Update, context: CallbackContext):
 	tgid = update.message.from_user.id
-	write_log(tgid, '/restart')
-	if cfg['kernel'] == 'python':
+	(km, cl, jc, cnn, t, kernel) = kernel_dict[tgid]
+	write_log(tgid, '/help')
+	if kernel == 'python':
 		s = 'Python Help\n'
 		s += 'https://www.python.org/about/help/'
-	elif cfg['kernel'] == 'octave':
+	elif kernel == 'octave':
 		s = 'Octave Help\n'
 		s += 'https://www.gnu.org/software/octave/support.html'
-	elif cfg['kernel'] == 'ir':
+	elif kernel == 'R':
 		s = 'R Help\n'
 		s += 'https://www.r-project.org/help.html'
 	else:
