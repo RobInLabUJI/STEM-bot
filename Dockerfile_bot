@@ -1,0 +1,10 @@
+FROM python:3.8-slim-buster
+
+RUN python -m pip install python-telegram-bot rpyc pyyaml
+
+ADD bot.py config.yaml /root/
+
+WORKDIR /root
+
+CMD ["./bot.py", "config.yaml"]
+

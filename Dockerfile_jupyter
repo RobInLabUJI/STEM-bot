@@ -1,0 +1,9 @@
+FROM jupyter/scipy-notebook
+
+RUN python -m pip install rpyc
+
+EXPOSE 18812
+
+CMD ["/opt/conda/bin/rpyc_classic.py", "--host", "0.0.0.0"]
+
+USER $NB_UID
