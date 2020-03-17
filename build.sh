@@ -1,1 +1,3 @@
-docker-compose --compatibility build
+#!/bin/sh
+
+docker build -t stem-bot .

@@ -1,8 +1,6 @@
 FROM jupyter/scipy-notebook
 
-RUN python -m pip install rpyc
-
-RUN python -m pip install octave_kernel
+RUN python -m pip install python-telegram-bot pyyaml octave_kernel
 
 USER root
 
@@ -26,10 +24,6 @@ RUN apt-get update && \
 
 # Fix for devtools https://github.com/conda-forge/r-devtools-feedstock/issues/4
 RUN ln -s /bin/tar /bin/gtar
-
-EXPOSE 18812
-
-CMD ["/opt/conda/bin/rpyc_classic.py", "--host", "0.0.0.0"]
 
 USER $NB_UID
 
@@ -61,3 +55,13 @@ RUN conda install --quiet --yes \
 
 # Install e1071 R package (dependency of the caret R package)
 RUN conda install --quiet --yes r-e1071
+
+USER root
+
+ADD bot.py Listener.py callbacks.py config.py config.yaml /home/jovyan/
+
+WORKDIR /home/jovyan
+
+CMD ["./bot.py", "config.yaml"]
+
+USER $NB_UID
