@@ -106,5 +106,9 @@ def text_handler(update, context):
                 context.bot.send_photo(chat_id=update.message.chat_id, photo=bio)
 
 def signal_handler(signum, frame):
-    print('signal received %d' % signum)
-
+    print('Stopping kernels...')
+    for tgid in config.kernel_dict:
+        print(tgid)
+        (km, cl, t, kernel) = config.kernel_dict[tgid]
+        km.shutdown_kernel(now=True)
+    print('Done.')
