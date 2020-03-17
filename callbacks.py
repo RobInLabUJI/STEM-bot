@@ -62,8 +62,20 @@ def stop_container(tgid):
     pass
   
 def help_cb(update, context):
-    """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    tgid = update.message.from_user.id
+    (km, cl, t, kernel) = config.kernel_dict[tgid]
+    if kernel == 'python':
+        s = 'Python Help\n'
+        s += 'https://www.python.org/about/help/'
+    elif kernel == 'octave':
+        s = 'Octave Help\n'
+        s += 'https://www.gnu.org/software/octave/support.html'
+    elif kernel == 'R':
+        s = 'R Help\n'
+        s += 'https://www.r-project.org/help.html'
+    else:
+        s = 'No help available for this kernel yet'
+    update.message.reply_text(s)
 
 def error_cb(update, context):
     """Log Errors caused by Updates."""
