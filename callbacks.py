@@ -104,3 +104,7 @@ def text_handler(update, context):
                 bio.write(image)
                 bio.seek(0)
                 context.bot.send_photo(chat_id=update.message.chat_id, photo=bio)
+
+def signal_handler(signum, frame):
+    print('signal received %d' % signum)
+

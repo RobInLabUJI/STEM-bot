@@ -3,21 +3,18 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 from Listener import Listener
-from callbacks import start_cb, help_cb, error_cb, text_handler
+from callbacks import start_cb, help_cb, error_cb, text_handler, signal_handler
 
-import sys, yaml
+import sys
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
-		print('usage: bot_server.py config_file')
+		print('usage: bot.py TOKEN')
 		sys.exit(0)
 	else:
-		config_file = sys.argv[1]
+		token = sys.argv[1]
 
-	with open(config_file, 'r') as ymlfile:
-	    cfg = yaml.load(ymlfile, Loader=yaml.SafeLoader)
-
-	updater = Updater(cfg['token'], use_context=True)
+	updater = Updater(token, use_context=True, user_sig_handler=signal_handler)
 
 	dp = updater.dispatcher
 
