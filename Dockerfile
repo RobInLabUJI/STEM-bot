@@ -62,6 +62,4 @@ ADD bot.py Listener.py callbacks.py config.py /home/jovyan/
 
 WORKDIR /home/jovyan
 
-CMD ["./bot.py", "1100848763:AAEIYewq0wGX76qpw_1Zib_FMc8CpIJWGEI"]
-
 USER $NB_UID

@@ -8,8 +8,6 @@ from threading import Timer
 from Listener import Listener
 
 def start_cb(update, context):
-    #global num_kernels
-    #global kernel_dict
     tgid = update.message.from_user.id
     kernel = context.args[0]
     if tgid in config.kernel_dict:
@@ -32,7 +30,7 @@ def start_cb(update, context):
         
         rwd = wd
 
-        t = Timer(config.timer_value, stop_container, [tgid])
+        t = Timer(config.timer_value, stop_kernel, [tgid])
         t.start()
         if kernel=='python':
             kernel_name = 'python'
@@ -58,8 +56,18 @@ def _init_commands(cl, wd, kernel):
         cl.execute_interactive("pkg prefix %s %s" % (pkgd, pkgd))
         cl.execute_interactive("pkg local_list %s/.octave_packages" % pkgd)
         
-def stop_container(tgid):
-    pass
+def restart_cb(update, context):
+    tgid = update.message.from_user.id
+    if tgid in config.kernel_dict:
+        update.message.reply_text('Stopping kernel...')
+        stop_kernel(tgid)
+    start_cb(update, context)
+
+def stop_kernel(tgid):
+    (km, cl, t, kernel) = config.kernel_dict[tgid]
+    t.cancel()
+    km.shutdown_kernel(now=True)
+    config.kernel_dict.pop(tgid, None)
   
 def help_cb(update, context):
     tgid = update.message.from_user.id
@@ -91,7 +99,7 @@ def text_handler(update, context):
             update.message.reply_text('Kernel not running, please use command /restart')
         else:
             t.cancel()
-            t = Timer(config.timer_value, stop_container, [tgid])
+            t = Timer(config.timer_value, stop_kernel, [tgid])
             t.start()
             config.kernel_dict[tgid] = (km, cl, t, kernel)
             li = Listener(kernel)

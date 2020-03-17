@@ -3,7 +3,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 from Listener import Listener
-from callbacks import start_cb, help_cb, error_cb, text_handler, signal_handler
+from callbacks import start_cb, help_cb, error_cb, restart_cb, text_handler, signal_handler
 
 import sys
 
@@ -20,6 +20,7 @@ if __name__ == '__main__':
 
 	dp.add_handler(CommandHandler("start", start_cb))
 	dp.add_handler(CommandHandler("help", help_cb))
+	dp.add_handler(CommandHandler("restart", restart_cb))
 	dp.add_handler(MessageHandler(Filters.text, text_handler))
 	dp.add_error_handler(error_cb)
 
