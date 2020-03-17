@@ -9,41 +9,40 @@ from Listener import Listener
 
 def start_cb(update, context):
     tgid = update.message.from_user.id
-    kernel = context.args[0]
-    if tgid in config.kernel_dict:
-        update.message.reply_text('Kernel already started')
-    elif config.num_kernels >=50:
-        update.message.reply_text('Too many users, please come back later!')
+    if len(context.args)==0:
+        update.message.reply_text('Usage: /start <kernel>\nList of available kernels %s' % (config.kernels,))
     else:
-        config.num_kernels += 1
-        update.message.reply_text('Starting kernel...')
-        wd = '/home/jovyan/work/' + str(tgid)
-        os.makedirs(wd, exist_ok=True)
-        if kernel=='python':
-            pass
-        elif kernel == 'R':
-            rlibd = wd + '/R-libs'
-            os.makedirs(rlibd, exist_ok=True)
-        elif kernel == 'octave':
-            pkgd = wd + '/octave_packages'
-            os.makedirs(pkgd, exist_ok=True)
-        
-        rwd = wd
-
-        t = Timer(config.timer_value, stop_kernel, [tgid])
-        t.start()
-        if kernel=='python':
-            kernel_name = 'python'
-        elif kernel=='R':
-            kernel_name = 'ir'
+        kernel = context.args[0]
+        if not kernel in config.kernels:
+            update.message.reply_text('Kernel %s not available\nList of available kernels %s' % (kernel, config.kernels))
+        elif tgid in config.kernel_dict:
+            update.message.reply_text('Kernel already started')
+        elif config.num_kernels >=50:
+            update.message.reply_text('Too many users, please come back later!')
         else:
-            kernel_name = kernel
-        km = jupyter_client.KernelManager(kernel_name = kernel_name)
-        km.start_kernel(cwd=rwd)
-        cl = km.blocking_client()
-        _init_commands(cl, rwd, kernel)
-        config.kernel_dict[tgid] = (km, cl, t, kernel)
-        update.message.reply_text(kernel + ' is ready!')
+            config.num_kernels += 1
+            update.message.reply_text('Starting kernel...')
+            wd = '/home/jovyan/work/' + str(tgid)
+            os.makedirs(wd, exist_ok=True)
+            if kernel=='python':
+                pass
+            elif kernel == 'R':
+                rlibd = wd + '/R-libs'
+                os.makedirs(rlibd, exist_ok=True)
+            elif kernel == 'octave':
+                pkgd = wd + '/octave_packages'
+                os.makedirs(pkgd, exist_ok=True)
+            
+            rwd = wd
+
+            t = Timer(config.timer_value, stop_kernel, [tgid])
+            t.start()
+            km = jupyter_client.KernelManager(kernel_name = config.kernel_name[kernel])
+            km.start_kernel(cwd=rwd)
+            cl = km.blocking_client()
+            _init_commands(cl, rwd, kernel)
+            config.kernel_dict[tgid] = (km, cl, t, kernel)
+            update.message.reply_text(kernel + ' is ready!')
         
 def _init_commands(cl, wd, kernel):
     if kernel == 'python':
@@ -58,10 +57,17 @@ def _init_commands(cl, wd, kernel):
         
 def restart_cb(update, context):
     tgid = update.message.from_user.id
-    if tgid in config.kernel_dict:
-        update.message.reply_text('Stopping kernel...')
-        stop_kernel(tgid)
-    start_cb(update, context)
+    if len(context.args)==0:
+        update.message.reply_text('Usage: /restart <kernel>\nList of available kernels %s' % (config.kernels,))
+    else:
+        kernel = context.args[0]
+        if not kernel in config.kernels:
+            update.message.reply_text('Kernel %s not available\nList of available kernels %s' % (kernel, config.kernels))
+        else:
+            if tgid in config.kernel_dict:
+                update.message.reply_text('Stopping kernel...')
+                stop_kernel(tgid)
+            start_cb(update, context)
 
 def stop_kernel(tgid):
     (km, cl, t, kernel) = config.kernel_dict[tgid]
