@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
+import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-from Listener import Listener
+import config
 from callbacks import start_cb, help_cb, error_cb, restart_cb, text_handler, signal_handler
-
-import sys
+from Listener import Listener
 
 if __name__ == '__main__':
-	if len(sys.argv) < 2:
-		print('usage: bot.py TOKEN')
+	if len(sys.argv) < 3:
+		print('usage: bot.py <kernel> <TOKEN>')
 		sys.exit(0)
 	else:
-		token = sys.argv[1]
+		config.kernel = sys.argv[1]
+		token = sys.argv[2]
 
 	updater = Updater(token, use_context=True, user_sig_handler=signal_handler)
 

@@ -2,6 +2,7 @@ num_kernels = 0
 kernel_dict = {}
 timer_value = 600.0 #seconds
 
+kernel = ''
 kernels = ('python', 'R', 'octave')
 kernel_name = {'python':'python', 'R':'ir', 'octave':'octave'}
 

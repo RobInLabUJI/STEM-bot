@@ -8,14 +8,9 @@ from threading import Timer
 from Listener import Listener
 
 def start_cb(update, context):
-    tgid = update.message.from_user.id
-    if len(context.args)==0:
-        update.message.reply_text('Usage: /start <kernel>\nList of available kernels %s' % (config.kernels,))
-    else:
-        kernel = context.args[0]
-        if not kernel in config.kernels:
-            update.message.reply_text('Kernel %s not available\nList of available kernels %s' % (kernel, config.kernels))
-        elif tgid in config.kernel_dict:
+        tgid = update.message.from_user.id
+        kernel = config.kernel
+        if tgid in config.kernel_dict:
             update.message.reply_text('Kernel already started')
         elif config.num_kernels >=50:
             update.message.reply_text('Too many users, please come back later!')
@@ -32,15 +27,15 @@ def start_cb(update, context):
             elif kernel == 'octave':
                 pkgd = wd + '/octave_packages'
                 os.makedirs(pkgd, exist_ok=True)
-            
+
             rwd = wd
 
-            t = Timer(config.timer_value, stop_kernel, [tgid])
-            t.start()
             km = jupyter_client.KernelManager(kernel_name = config.kernel_name[kernel])
             km.start_kernel(cwd=rwd)
             cl = km.blocking_client()
             _init_commands(cl, rwd, kernel)
+            t = Timer(config.timer_value, stop_kernel, [tgid])
+            t.start()
             config.kernel_dict[tgid] = (km, cl, t, kernel)
             update.message.reply_text(kernel + ' is ready!')
         
@@ -56,23 +51,18 @@ def _init_commands(cl, wd, kernel):
         cl.execute_interactive("pkg local_list %s/.octave_packages" % pkgd)
         
 def restart_cb(update, context):
-    tgid = update.message.from_user.id
-    if len(context.args)==0:
-        update.message.reply_text('Usage: /restart <kernel>\nList of available kernels %s' % (config.kernels,))
-    else:
-        kernel = context.args[0]
-        if not kernel in config.kernels:
-            update.message.reply_text('Kernel %s not available\nList of available kernels %s' % (kernel, config.kernels))
-        else:
-            if tgid in config.kernel_dict:
+        tgid = update.message.from_user.id
+        kernel = config.kernel
+        if tgid in config.kernel_dict:
                 update.message.reply_text('Stopping kernel...')
                 stop_kernel(tgid)
-            start_cb(update, context)
+        start_cb(update, context)
 
 def stop_kernel(tgid):
     (km, cl, t, kernel) = config.kernel_dict[tgid]
     t.cancel()
-    km.shutdown_kernel(now=True)
+    km.shutdown_kernel()
+    #km.shutdown_kernel(now=True)
     config.kernel_dict.pop(tgid, None)
   
 def help_cb(update, context):
@@ -136,5 +126,6 @@ def signal_handler(signum, frame):
     for tgid in config.kernel_dict:
         print(tgid)
         (km, cl, t, kernel) = config.kernel_dict[tgid]
-        km.shutdown_kernel(now=True)
+        km.shutdown_kernel()
+        #km.shutdown_kernel(now=True)
     print('Done.')

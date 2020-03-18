@@ -1,0 +1,15 @@
+FROM jupyter/base-notebook
+
+RUN python -m pip install python-telegram-bot
+
+RUN conda install --yes numpy matplotlib && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USER
+    
+USER root
+
+ADD bot.py Listener.py callbacks.py config.py /home/jovyan/
+
+WORKDIR /home/jovyan
+
+USER $NB_UID
