@@ -1,4 +1,4 @@
-import logging
+import logging, sys
 from telegram import Update
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes, CommandHandler
 
@@ -14,11 +14,11 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
 if __name__ == '__main__':
-	if len(sys.argv) < 2:
-		print('usage: bot.py TOKEN')
-		sys.exit(0)
-	else:
-		token = sys.argv[1]
+    if len(sys.argv) < 2:
+        print('usage: bot2.py TOKEN')
+        sys.exit(0)
+    else:
+        token = sys.argv[1]
 	
     application = ApplicationBuilder().token(token).build()
     
