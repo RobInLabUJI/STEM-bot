@@ -2,7 +2,8 @@ import logging, sys
 from telegram import Update
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes, CommandHandler
 
-import jupyter_client
+import base64, jupyter_client
+from io import BytesIO
 from Listener import Listener
 
 logging.basicConfig(
@@ -22,7 +23,14 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	if li.text:
 		text = li.escape_ansi_text()                              
 		await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
-
+	if li.img_data:
+		image = base64.b64decode(li.img_data)
+		bio = BytesIO()
+		bio.name = 'image.png'
+		bio.write(image)
+		bio.seek(0)
+		await context.bot.send_photo(chat_id=update.message.chat_id, photo=bio)
+                
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print('usage: bot2.py TOKEN')
