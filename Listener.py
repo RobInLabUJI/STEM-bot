@@ -1,7 +1,7 @@
 import re
 
 class Listener():
-    def __init__(self, kernel):
+    def __init__(self, kernel="python"):
         self.text = ''
         self.ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
         self.img_data = None
