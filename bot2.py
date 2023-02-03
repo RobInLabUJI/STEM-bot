@@ -19,8 +19,9 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	reply = kernel_client.execute_interactive(update.message.text, timeout=5.0, 
 										  allow_stdin=False, 
                                           output_hook=li.output_cb)
-	if li.text:                                      
-		await context.bot.send_message(chat_id=update.effective_chat.id, text=li.text)
+	if li.text:
+		text = li.escape_ansi_text()                              
+		await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
