@@ -14,7 +14,13 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('6199342875:AAEfzM7wykxxEyYzUT-EpWr6UPlR72-ri6Y').build()
+	if len(sys.argv) < 2:
+		print('usage: bot.py TOKEN')
+		sys.exit(0)
+	else:
+		token = sys.argv[1]
+	
+    application = ApplicationBuilder().token(token).build()
     
     start_handler = CommandHandler('start', start)
     echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
