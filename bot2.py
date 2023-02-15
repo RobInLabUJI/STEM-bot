@@ -38,7 +38,7 @@ if __name__ == '__main__':
     else:
         token = sys.argv[1]
 	
-    kernel_manager, kernel_client = jupyter_client.manager.start_new_kernel(kernel_name='python3')
+    kernel_manager, kernel_client = jupyter_client.manager.start_new_kernel(kernel_name='python')
 
     application = ApplicationBuilder().token(token).build()
     
