@@ -32,13 +32,14 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 		await context.bot.send_photo(chat_id=update.message.chat_id, photo=bio)
                 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('usage: bot2.py TOKEN')
+    if len(sys.argv) < 3:
+        print('usage: bot2.py octave|python TOKEN')
         sys.exit(0)
     else:
-        token = sys.argv[1]
+        kernel_name = sys.argv[1]
+        token = sys.argv[2]
 	
-    kernel_manager, kernel_client = jupyter_client.manager.start_new_kernel(kernel_name='python')
+    kernel_manager, kernel_client = jupyter_client.manager.start_new_kernel(kernel_name=kernel_name)
 
     application = ApplicationBuilder().token(token).build()
     
