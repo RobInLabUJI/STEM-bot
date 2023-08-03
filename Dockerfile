@@ -27,3 +27,6 @@ ADD bot2.py Listener.py callbacks.py config.py /home/jovyan/
 WORKDIR /home/jovyan/work
 
 USER $NB_UID
+
+HEALTHCHECK NONE
+
