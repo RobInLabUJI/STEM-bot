@@ -26,7 +26,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         new_tgid = 0
     kernel_client = kernel_clients[kernel_tgids.index(tgid)]
 
-    li = Listener()
+    li = Listener(kernel_name)
     reply = kernel_client.execute_interactive(update.message.text, timeout=5.0, 
                           allow_stdin=False, 
                           output_hook=li.output_cb)
@@ -43,7 +43,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print('usage: bot2.py octave|python TOKEN')
+        print('usage: bot2.py octave|python|ir TOKEN')
         sys.exit(0)
     else:
         kernel_name = sys.argv[1]

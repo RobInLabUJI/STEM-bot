@@ -15,7 +15,7 @@ class Listener():
         content = msg['content']
         if msg_type == 'execute_result': # or msg_type == 'display_data':
             self.text += content['data']['text/plain']
-        elif msg_type == 'display_data' and self.kernel == 'R' and 'text/plain' in content['data']:
+        elif msg_type == 'display_data' and self.kernel == 'ir' and 'text/plain' in content['data']:
             if content['data']['text/plain'] != 'plot without title':
                 self.text += content['data']['text/plain']
         elif msg_type == 'stream':

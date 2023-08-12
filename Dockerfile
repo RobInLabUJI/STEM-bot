@@ -1,4 +1,4 @@
-FROM jupyter/scipy-notebook
+FROM jupyter/datascience-notebook
 
 RUN python -m pip install python-telegram-bot pyyaml octave_kernel
 
@@ -22,7 +22,7 @@ RUN apt-get update && \
     gcc && \
     rm -rf /var/lib/apt/lists/*
 
-ADD bot2.py Listener.py callbacks.py config.py /home/jovyan/
+ADD bot2.py Listener.py /home/jovyan/
 
 WORKDIR /home/jovyan/work
 
