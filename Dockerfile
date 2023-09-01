@@ -22,6 +22,8 @@ RUN apt-get update && \
     gcc && \
     rm -rf /var/lib/apt/lists/*
 
+RUN python -m pip install roboticstoolbox-python
+
 ADD bot2.py Listener.py /home/jovyan/
 
 WORKDIR /home/jovyan/work
