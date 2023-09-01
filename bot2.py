@@ -22,7 +22,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not tgid in kernel_tgids:
       kernel_tgids[new_tgid] = tgid
       new_tgid += 1
-      if new_tgid==10:
+      if new_tgid==NUMBER_OF_CLIENTS:
         new_tgid = 0
     kernel_client = kernel_clients[kernel_tgids.index(tgid)]
 
@@ -51,9 +51,10 @@ if __name__ == '__main__':
     
     kernel_managers = []
     kernel_clients  = []
-    kernel_tgids = [None]*10
+    NUMBER_OF_CLIENTS = 100
+    kernel_tgids = [None]*NUMBER_OF_CLIENTS
     new_tgid = 0
-    for _ in range(10):
+    for _ in range(NUMBER_OF_CLIENTS):
       kernel_manager, kernel_client = jupyter_client.manager.start_new_kernel(kernel_name=kernel_name)
       kernel_managers.append(kernel_manager)
       kernel_clients.append(kernel_client)
