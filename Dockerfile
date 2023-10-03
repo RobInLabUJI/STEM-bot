@@ -22,7 +22,9 @@ RUN apt-get update && \
     gcc && \
     rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install roboticstoolbox-python
+RUN python -m pip install roboticstoolbox-python sympy
+
+RUN octave --eval "pkg install -forge symbolic"
 
 ADD bot2.py Listener.py /home/jovyan/
 
