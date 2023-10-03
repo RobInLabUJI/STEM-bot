@@ -33,7 +33,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                           output_hook=li.output_cb)
     if li.text:
         text = li.escape_ansi_text()                              
-        text = '```' + text + '```'
+        text = '```\n' + text + '\n```'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
     if li.img_data:
         image = base64.b64decode(li.img_data)
