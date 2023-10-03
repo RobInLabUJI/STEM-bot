@@ -1,6 +1,7 @@
 import logging, sys
 from telegram import Update
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes, CommandHandler
+from telegram.constants import ParseMode
 
 import base64, jupyter_client
 from io import BytesIO
@@ -32,7 +33,8 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                           output_hook=li.output_cb)
     if li.text:
         text = li.escape_ansi_text()                              
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
+        text = '```' + text + '```'
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
     if li.img_data:
         image = base64.b64decode(li.img_data)
         bio = BytesIO()
@@ -51,7 +53,7 @@ if __name__ == '__main__':
     
     kernel_managers = []
     kernel_clients  = []
-    NUMBER_OF_CLIENTS = 100
+    NUMBER_OF_CLIENTS = 25
     kernel_tgids = [None]*NUMBER_OF_CLIENTS
     new_tgid = 0
     for _ in range(NUMBER_OF_CLIENTS):
